@@ -16,20 +16,21 @@ import {
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import clsx from 'clsx';
-import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+import { useClose } from 'src/hooks/useClose';
 
-type props = {
+type Props = {
 	currentState: ArticleStateType;
 	onUpdate(state: ArticleStateType): void;
 };
 
-export const ArticleParamsForm = ({ currentState, onUpdate }: props) => {
-	const [open, setOpen] = useState(false);
+export const ArticleParamsForm = ({ currentState, onUpdate }: Props) => {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
-	useOutsideClickClose({
-		isOpen: open,
+
+	useClose({
+		isOpen: isMenuOpen,
+		onClose: () => setIsMenuOpen(false),
 		rootRef: containerRef,
-		onChange: setOpen,
 	});
 
 	const [selectArticleState, setSelectArticleState] = useState(currentState);
@@ -48,27 +49,17 @@ export const ArticleParamsForm = ({ currentState, onUpdate }: props) => {
 		onUpdate(defaultArticleState);
 	};
 
-	if (!open) {
-		return (
-			<>
-				<ArrowButton isOpen={false} onClick={() => setOpen(true)} />
-				<aside ref={containerRef} className={styles.container}>
-					<form className={styles.form}>
-						<div className={styles.bottomContainer}>
-							<Button title='Сбросить' htmlType='reset' type='clear' />
-							<Button title='Применить' htmlType='submit' type='apply' />
-						</div>
-					</form>
-				</aside>
-			</>
-		);
-	}
 	return (
 		<>
-			<ArrowButton isOpen={true} onClick={() => setOpen(false)} />
+			<ArrowButton
+				isOpen={isMenuOpen}
+				onClick={() => setIsMenuOpen(!isMenuOpen)}
+			/>
 			<aside
 				ref={containerRef}
-				className={clsx(styles.container, open && styles.container_open)}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isMenuOpen,
+				})}>
 				<form className={styles.form} onSubmit={handleSubmit}>
 					<Select
 						title='Шрифт'
